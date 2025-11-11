@@ -1,21 +1,52 @@
 {
   lib,
   buildPythonPackage,
-  fetchPypi,
+  fetchFromGitHub,
+
+  # build-system
+  setuptools,
+
+  # dependencies
   aiohttp,
+  async-timeout,
+
+  # tests
+  aiohttp-cors,
+  pytest-aiohttp,
+  pytest-mock,
+  pytestCheckHook,
 }:
 
 buildPythonPackage rec {
   pname = "sockjs";
   version = "0.13.0";
-  format = "setuptools";
+  pyproject = true;
 
-  src = fetchPypi {
-    inherit pname version;
-    hash = "sha256-V+lZoj8gqNVRSdHl2ws7hwcm8rStgWbUG9z0EbNs33Y=";
+  src = fetchFromGitHub {
+    owner = "aio-libs";
+    repo = "sockjs";
+    tag = "v${version}";
+    hash = "sha256-MqlI8hwKLBYtRd1U8EluJTRoOy8pia1AqNuiKlj/QIA=";
   };
 
-  propagatedBuildInputs = [ aiohttp ];
+  build-system = [ setuptools ];
+
+  dependencies = [
+    aiohttp
+    async-timeout
+  ];
+
+  nativeCheckInputs = [
+    aiohttp-cors
+    pytest-aiohttp
+    pytest-mock
+    pytestCheckHook
+  ];
+
+  disabledTestPaths = [
+    # missing cykooz dependency
+    "tests/test_route.py"
+  ];
 
   pythonImportsCheck = [ "sockjs" ];
 
