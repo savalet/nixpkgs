@@ -27,16 +27,13 @@ buildPythonPackage rec {
 
   build-system = [ poetry-core ];
 
-  dependencies =
-    lib.optionals (pythonOlder "3.14") [
-      bleak
-    ]
-    ++ lib.optionals (stdenv.hostPlatform.isLinux && pythonOlder "3.14") [
-      bluetooth-adapters
-    ]
-    ++ lib.optionals stdenv.hostPlatform.isLinux [
-      dbus-fast
-    ];
+  dependencies = [
+    bleak
+  ]
+  ++ lib.optionals stdenv.hostPlatform.isLinux [
+    bluetooth-adapters
+    dbus-fast
+  ];
 
   nativeCheckInputs = [
     pytest-asyncio
