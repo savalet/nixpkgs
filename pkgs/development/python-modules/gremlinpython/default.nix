@@ -2,13 +2,13 @@
   lib,
   buildPythonPackage,
   fetchFromGitHub,
+  setuptools,
   aenum,
   aiohttp,
-  importlib-metadata,
+  async-timeout,
   isodate,
   nest-asyncio,
   pytestCheckHook,
-  pythonOlder,
   mock,
   pyhamcrest,
   pyyaml,
@@ -19,34 +19,28 @@ buildPythonPackage rec {
   __structuredAttrs = true;
 
   pname = "gremlinpython";
-  version = "3.7.3";
-  format = "setuptools";
-
-  disabled = pythonOlder "3.7";
+  version = "3.8.0";
+  pyproject = true;
 
   src = fetchFromGitHub {
     owner = "apache";
     repo = "tinkerpop";
     tag = version;
-    hash = "sha256-Yc0l3kE+6dM9v4QUZPFpm/yjDCrqVO35Vy5srEjAExE=";
+    hash = "sha256-dslSvtne+0mobjhjZDiO7crQE3aW5wEMWw7l3LkBTV8=";
   };
 
   sourceRoot = "${src.name}/gremlin-python/src/main/python";
 
-  postPatch = ''
-    sed -i '/pytest-runner/d' setup.py
+  build-system = [
+    setuptools
+  ];
 
-    substituteInPlace setup.py \
-      --replace 'importlib-metadata<5.0.0' 'importlib-metadata' \
-      --replace "os.getenv('VERSION', '?').replace('-SNAPSHOT', '.dev-%d' % timestamp)" '"${version}"'
-  '';
+  pythonRelaxDeps = [ "async-timeout" ];
 
-  # setup-requires requirements
-  nativeBuildInputs = [ importlib-metadata ];
-
-  propagatedBuildInputs = [
+  dependencies = [
     aenum
     aiohttp
+    async-timeout
     isodate
     nest-asyncio
   ];
@@ -58,12 +52,6 @@ buildPythonPackage rec {
     pyyaml
     radish-bdd
   ];
-
-  # disable custom pytest report generation
-  preCheck = ''
-    substituteInPlace setup.cfg --replace 'addopts' '#addopts'
-    export TEST_TRANSACTIONS='false'
-  '';
 
   # many tests expect a running tinkerpop server
   disabledTestPaths = [
